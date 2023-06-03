@@ -7,15 +7,22 @@ st.title('Mass Shootings in the US')
 # Coordinates of shootings in the US
 # Reference: https://docs.streamlit.io/library/api-reference/charts/st.map
 
-filepath = 'data/violence_project.xlsx'
+sheet_url = "https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/edit#gid=0"
 
-# Read the excel file into a dataframe
-df_data = pd.read_excel(filepath, sheet_name='Full Database')
+# Modify the URL to export the sheet as CSV format
+url_modified = sheet_url.replace("/edit#gid=", "/export?format=csv&gid=")
 
-# Include coordinate columns and drop nulls
-df_coordinates = df_data[['Latitude', 'Longitude']].dropna()
+# Read data
+df_mj = pd.read_csv(url_modified)
 
-# Rename columns to 'lat' and 'lon' 
-df_coordinates.columns = ['lat', 'lon']
+# Select coordinate columns 
+df_coordinates = df_mj[['latitude', 'longitude']]
+
+# Remove rows containing '-' in any column
+df_coordinates = df_coordinates[(df_coordinates != '-').all(axis=1)]
+
+# Convert the selected columns to numeric data type
+df_coordinates = df_coordinates.apply(pd.to_numeric)
+
 
 st.map(df_coordinates)
